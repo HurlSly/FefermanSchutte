@@ -82,7 +82,7 @@ class Ordinal:
             if self.IsOne():
                 return "1"
             else:
-                return "Phi(%s, %s)" % (self.Decomp[0][0], self.Decomp[0][1])
+                return "(%s, %s)" % (self.Decomp[0][0], self.Decomp[0][1])
         
         out = ""
 
@@ -94,6 +94,7 @@ class Ordinal:
             n = 1
             while i + n < len(self) and self.Decomp[i + n] == self.Decomp[i]:
                 n += 1
+            
             
             current = Ordinal([self.Decomp[i]])
                 
@@ -118,40 +119,41 @@ class Ordinal:
             return False
         
         return self.Decomp[0][0].IsZero() and self.Decomp[0][1].IsZero()
-    
+
     def IsLimit(self):
         if self.IsZero():
             return False
-        
-        return not(Ordinal([self.Decomp[-1]]).IsOne())
-    
+
+        return not Ordinal([self.Decomp[-1]]).IsOne()
+
     def FundamentalSequence(self, n):
         if self.IsZero():
             return self
-        
+
         zero = Ordinal([])
-        
+
         (a, b) = self.Decomp[-1]
-        
+
         if a.IsZero():
             if b.IsZero():
                 return Ordinal(self.Decomp[:-1])
             
             elif b.IsLimit():
                 return Ordinal(self.Decomp[:-1] + [[a, b.FundamentalSequence(n)]])
-            
+
             else:
                 return Ordinal(self.Decomp[:-1] + [[a, b.FundamentalSequence(n)]] * n)
-            
+
         elif a.IsLimit():
             if b.IsZero():
                 return Ordinal(self.Decomp[:-1] + [[a.FundamentalSequence(n), zero]])
             
             elif b.IsLimit():
                 return Ordinal(self.Decomp[:-1] + [[a, b.FundamentalSequence(n)]])
-            
+
             else:
-                return Ordinal(self.Decomp[:-1] + [[a.FundamentalSequence(n), b]])
+                beta = b.FundamentalSequence(n)
+                return Ordinal(self.Decomp[:-1] + [[a.FundamentalSequence(n), Ordinal([[a, beta], [zero, zero]])]])
             
         else:
             alpha = a.FundamentalSequence(n)
@@ -191,14 +193,11 @@ def FeffermanShutte(n):
     while not current.IsZero():
         current = current.FundamentalSequence(t)
         t += 1
-        if t % 1==0:
-            print ("%d: %s" % (t, current))
-    
-    print("---")
+        
     return t
     
 def main():
-    print(FeffermanShutte(2))
+    print(FeffermanShutte(4))
     
 main()
         
